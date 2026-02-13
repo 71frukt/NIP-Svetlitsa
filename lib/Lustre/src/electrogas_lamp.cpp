@@ -1,9 +1,6 @@
-#include "Lustre/electrogas_device.hpp"
+#include "electrogas_lamp.hpp"
 
-namespace Esp32Soft
-{
-
-void ElectrogasDevice::StartIgnition(uint8_t target_pow)
+void ElectrogasLamp::StartIgnition(uint8_t target_pow)
 {
     if (target_pow > 100) target_pow = 100;
     
@@ -16,10 +13,10 @@ void ElectrogasDevice::StartIgnition(uint8_t target_pow)
     last_update_   = millis();
 
     // Устанавливаем начальное "тление" через виртуальный метод
-    ApplyHwBrightness(10); 
+    SetBrightness(10);
 }
 
-bool ElectrogasDevice::Update()
+bool ElectrogasLamp::Update()
 {
     if (state_ == IDLE)
         return false;
@@ -29,56 +26,63 @@ bool ElectrogasDevice::Update()
     if (current_millis - last_update_ >= step_duration_)
     {
         last_update_ = current_millis;
-        ProcessFsm();
+        ProcessFsm_();
     }
+    
     return true;
 }   
 
-void ElectrogasDevice::ProcessFsm()
+void ElectrogasLamp::ProcessFsm_()
 {
     switch (state_)
     {
     case WARMUP:
+    {
         state_ = FLICKER_ON;
         step_duration_ = random(20, 80);
-        ApplyHwBrightness(random(50, 101));
+        SetBrightness(random(50, 101));
         break;
+    }
 
     case FLICKER_ON:
+    {
         state_ = FLICKER_OFF;
         step_duration_ = current_pause_;
-        ApplyHwBrightness(0);
+        SetBrightness(0);
 
         current_pause_ = (current_pause_ * random(60, 80)) / 100;
         if (current_pause_ < 20) current_pause_ = 20;
         break;
+    }
 
     case FLICKER_OFF:
+    {
         flicker_count_--;
         if (flicker_count_ > 0)
         {
             state_ = FLICKER_ON;
             step_duration_ = random(20, 80);
-            ApplyHwBrightness(random(50, 101));
+            SetBrightness(random(50, 101));
         }
 
         else
         {
             state_ = STABILIZE;
             step_duration_ = 150;
-            ApplyHwBrightness(target_brightness_ * 0.8);
+            SetBrightness(target_brightness_ * 0.8);
         }
         break;
+    }
 
     case STABILIZE:
+    {
         state_ = IDLE;
-        ApplyHwBrightness(target_brightness_);
+        SetBrightness(target_brightness_);
         break;
+    }
 
     case IDLE:
     default:
         break;
     }
-}
-
 }

@@ -1,18 +1,19 @@
 #include <Arduino.h>
 
-// put function declarations here:
-int myFunction(int, int);
+#include "electrogas_lamp.hpp"
+#include "ipwm_module.hpp"
+#include "esp32_pwm_module.hpp"
 
-void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+Esp32Soft::PwmModule lamp_pwm{14, 0}; // Пин 14, канал 0
+ElectrogasLamp lamp(lamp_pwm);
+
+void setup()
+{
+    Serial.begin(115200);
+
+    lamp.StartIgnition(100);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+    lamp.Update();
 }
