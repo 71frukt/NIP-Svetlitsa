@@ -4,24 +4,30 @@ void Fireplace::Update()
 {
     flame_.Update();
 
-    smoke_pow_ = flame_.GetPow();
+    if (smoke_btn_.changed())
+    {
+        if (smoke_btn_.isPressed())
+        {
+            if (water_sensor_.GetWaterLvl() == WaterSensor::WATER_DRY)
+            {
+                state_ = FLAME_FIRE_ONLY;
+            }
 
-    // задержка дыма
-    // unsigned long current_millis = millis();
+            else
+            {
+                state_ = FLAME_FIRE_AND_SMOKE;
+            }
+        }
+        
+        else
+        {
+            state_ = FLAME_FIRE_ONLY;
+        }
+    }
 
-    // if (current_millis - last_smoke_update_ >= smoke_update_interval_)
-    // {
-    //     last_smoke_update_ = current_millis;
 
-    //     smoke_pow_ = smoke_buffer_[head_];
-
-    //     smoke_buffer_[head_] = flame_.GetPow();
-
-    //     // В. Сдвигаем индекс головы
-    //     head_++;
-    //     if (head_ >= smoke_buffer_.size())
-    //     {
-    //         head_ = 0;
-    //     }
-    // }
+    if (state_ = FLAME_FIRE_AND_SMOKE)
+    {
+        // enable parogenerator;
+    }
 }

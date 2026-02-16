@@ -2,15 +2,19 @@
 
 #include <Arduino.h>
 #include <vector>
+#include <Bounce2.h>
 
 #include "flame.hpp"
+#include "water_sensor.hpp"
 #include "ipwm_module.hpp"
 
 class Fireplace
 {
 public:
-    Fireplace(IPwmModule& flame_pwm_module)
-        : flame_(flame_pwm_module)
+    Fireplace(IPwmModule& flame_pwm_module, const Bounce2::Button& smoke_btn, const WaterSensor& water_sensor)
+        : flame_        (flame_pwm_module)
+        , smoke_btn_    (smoke_btn)
+        , water_sensor_ (water_sensor)
         // : smoke_pow_            (0)
         // , smoke_fire_delay_ms_  (300)
         // , smoke_update_interval_(30 )
@@ -30,21 +34,26 @@ public:
         flame_.SetPow(pow);
     }
 
-    uint8_t GetFlamePow() const { return flame_.GetPow(); }
+    [[nodiscard]] uint8_t GetFlamePow () const { return flame_.GetPow(); }
+    [[nodiscard]] bool    FlameEnabled() const { return state_ == FLAME_FIRE_AND_SMOKE; }
+    
     // uint8_t GetSmokePow() { return smoke_pow_;     }
 
     void Update();
 
 private:
     Flame flame_;
-    // uint8_t smoke_pow_;
 
-    // const uint32_t smoke_fire_delay_ms_;       // задержка дыма
-    // const uint32_t smoke_update_interval_;     // дискретизация (33 FPS)
-    // unsigned long  last_smoke_update_;    
+    enum State
+    {
+        FLAME_FIRE_ONLY     ,
+        FLAME_FIRE_AND_SMOKE
+    };
 
-    // // кольцевой буфер
-    // std::vector<uint8_t> smoke_buffer_;
-    // size_t head_ = 0;
+    State state_;
+
+    const Bounce2::Button& smoke_btn_;
+    const WaterSensor    & water_sensor_;
+    
 
 };

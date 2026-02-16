@@ -45,7 +45,7 @@ public:
 
 private:
     uint8_t pow_;
-    IPwmModule& pwm_module_;
+    const IPwmModule& pwm_module_;
 
     enum State {
         IDLE,
